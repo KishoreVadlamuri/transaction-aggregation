@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TransactionAggregation.Application\TransactionAggregation.Application.csproj" />
+    <ProjectReference Include="..\TransactionAggregtion.Domain\TransactionAggregtion.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
