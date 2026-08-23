@@ -1,0 +1,12 @@
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/data
+**/*.user
+**/*.suo
+**/.DS_Store
+*.log
+TestResults/
+coverage/
+.idea/
