@@ -1,4 +1,4 @@
-﻿namespace TransactionAggregtion.Domain.Enums;
+﻿namespace TransactionAggregation.Domain.Enums;
 
 public enum TransactionSourceType
 {
