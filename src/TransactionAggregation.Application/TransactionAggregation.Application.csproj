@@ -9,10 +9,11 @@
   <ItemGroup>
     <PackageReference Include="MediatR" Version="14.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TransactionAggregtion.Domain\TransactionAggregtion.Domain.csproj" />
+    <ProjectReference Include="..\TransactionAggregation.Domain\TransactionAggregation.Domain.csproj" />
   </ItemGroup>
 
 </Project>

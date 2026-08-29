@@ -6,7 +6,7 @@
     <Project Path="src/TransactionAggregation.Api/TransactionAggregation.Api.csproj" Id="957638f4-3db0-40a3-92d2-c779a84f9957" />
     <Project Path="src/TransactionAggregation.Application/TransactionAggregation.Application.csproj" Id="0f4f50a4-f2ad-4f80-b026-b61bde129abe" />
     <Project Path="src/TransactionAggregation.Infrastructure/TransactionAggregation.Infrastructure.csproj" Id="3d1cfe4e-6b14-40ec-9af9-8d6aa8f9e241" />
-    <Project Path="src/TransactionAggregtion.Domain/TransactionAggregtion.Domain.csproj" Id="266d85e7-db32-4c71-a124-935d84a93143" />
+    <Project Path="src/TransactionAggregation.Domain/TransactionAggregation.Domain.csproj" Id="266d85e7-db32-4c71-a124-935d84a93143" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="src/TransactionAggregation.UnitTests/TransactionAggregation.UnitTests.csproj" Id="fa7ebcec-92ee-49ca-8482-ed325429d004" />

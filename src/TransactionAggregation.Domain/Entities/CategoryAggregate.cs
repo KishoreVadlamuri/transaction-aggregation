@@ -1,6 +1,6 @@
-﻿using TransactionAggregtion.Domain.Enums;
+﻿using TransactionAggregation.Domain.Enums;
 
-namespace TransactionAggregtion.Domain.Entities;
+namespace TransactionAggregation.Domain.Entities;
 
 public class CategoryAggregate
 {

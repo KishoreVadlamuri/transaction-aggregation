@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TransactionAggregtion.Domain.Entities
+namespace TransactionAggregation.Domain.Entities
 {
     public class CustomerAggregationResult
     {

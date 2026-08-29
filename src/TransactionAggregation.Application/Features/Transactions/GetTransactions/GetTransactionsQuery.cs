@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using TransactionAggregtion.Domain.Entities;
+using TransactionAggregation.Domain.Entities;
 
 namespace TransactionAggregation.Application.Features.Transactions.GetTransactions;
 

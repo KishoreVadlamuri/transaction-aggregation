@@ -14,7 +14,9 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0-nanoserver-ltsc2022 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/TransactionAggregation.Api/TransactionAggregation.Api.csproj", "src/TransactionAggregation.Api/"]
+# Ensure project files are present for restore by copying the solution and the src/ tree
+COPY TransactionAggregation.sln ./
+COPY src/ ./src
 RUN dotnet restore "./src/TransactionAggregation.Api/TransactionAggregation.Api.csproj"
 COPY . .
 WORKDIR "/src/src/TransactionAggregation.Api"
