@@ -80,7 +80,7 @@ public sealed class BankTransactionSource (ILogger<BankTransactionSource> logger
             Id = CreateDeterministicId(customerId, merchant, occurredAt, amount),
             CustomerId = customerId,
             TransactionAmount = amount,
-            Currency = "USD",
+            Currency = "ZAR",
             MerchantName = merchant,
             Details = details,
             TransactionDate = occurredAt,

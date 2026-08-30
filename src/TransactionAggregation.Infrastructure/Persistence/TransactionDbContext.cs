@@ -35,7 +35,7 @@ public sealed class FinancialTransactionRecord
     public Guid Id { get; set; }
     public string CustomerId { get; set; } = string.Empty;
     public decimal TransactionAmount { get; set; }
-    public string Currency { get; set; } = "USD";
+    public string Currency { get; set; } = "ZAR";
     public string MerchantName { get; set; } = string.Empty;
     public string Details { get; set; } = string.Empty;
     public DateTimeOffset TransactionDate { get; set; }

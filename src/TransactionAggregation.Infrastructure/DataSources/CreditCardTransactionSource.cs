@@ -91,7 +91,7 @@ public sealed class CreditCardTransactionSource (ILogger<CreditCardTransactionSo
             Id = CreateDeterministicId(customerId, merchant, occurredAt, amount),
             CustomerId = customerId,
             TransactionAmount = amount,
-            Currency = "USD",
+            Currency = "ZAR",
             MerchantName = merchant,
             Details = details,
             TransactionDate = occurredAt,
