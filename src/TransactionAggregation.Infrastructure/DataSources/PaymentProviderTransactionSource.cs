@@ -91,7 +91,7 @@ public sealed class PaymentProviderTransactionSource (ILogger<PaymentProviderTra
             Id = CreateDeterministicId(customerId, merchant, occurredAt, amount),
             CustomerId = customerId,
             TransactionAmount = amount,
-            Currency = "USD",
+            Currency = "ZAR",
             MerchantName = merchant,
             Details = description,
             TransactionDate = occurredAt,

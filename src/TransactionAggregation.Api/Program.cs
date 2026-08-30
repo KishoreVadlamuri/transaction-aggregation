@@ -60,8 +60,6 @@ app.UseCors();
 app.MapApiEndpoints();
 app.MapHealthChecks("/health");
 
-app.MapGet("/", () => Results.Redirect("/scalar"));
-
 startupLogger.LogInformation("API endpoints mapped; listening for requests");
 
 app.Run();
