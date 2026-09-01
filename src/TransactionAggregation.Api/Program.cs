@@ -5,11 +5,13 @@ using TransactionAggregation.Api.Middlewares;
 using TransactionAggregation.Application;
 using TransactionAggregation.Application.Options;
 using TransactionAggregation.Infrastructure;
+using TransactionAggregation.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddMessaging(builder.Configuration);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
