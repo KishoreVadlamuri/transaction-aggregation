@@ -38,7 +38,8 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV Aggregation__ExpensiveComputationDelayMs=1500
 ENV Kafka__BootstrapServers=kafka:9092
-
+ENV ServiceAccount__Username=appuser
+ENV ServiceAccount__PasswordHash=AQAAAAIAAYagAAAAEM4nTp2F4Jr8ev8AqBhqc7z2ltXlgwIUautkG0PjCoBWGepWTLj7eILTYQLfw0dzKw==
 
 EXPOSE 8080
 
@@ -56,6 +57,8 @@ WORKDIR /app
 ENV DOTNET_ENVIRONMENT=Production
 ENV Kafka__BootstrapServers=kafka:9092
 ENV Kafka__Topic=customer-transactions
+ENV Kafka__ConsumerGroupId=transaction-aggregation
+ENV Kafka__ClientId=transaction-transaction-aggregation-api
 ENV Publisher__Enabled=true
 ENV Publisher__IntervalSeconds=10
 ENV Publisher__ChunkSize=50

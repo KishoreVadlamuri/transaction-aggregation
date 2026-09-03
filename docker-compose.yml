@@ -11,6 +11,9 @@ services:
       Storage__PostgresConnectionString: "Host=postgres;Port=5432;Database=transaction_aggregation;Username=postgres;Password=postgres"
       Kafka__BootstrapServers: kafka:9092
       Aggregation__ExpensiveComputationDelayMs: "1000"
+      # Service account password hash (ASP.NET Identity); plaintext never stored in config.
+      ServiceAccount__Username: appuser
+      ServiceAccount__PasswordHash: AQAAAAIAAYagAAAAEM4nTp2F4Jr8ev8AqBhqc7z2ltXlgwIUautkG0PjCoBWGepWTLj7eILTYQLfw0dzKw==
     depends_on:
       kafka:
         condition: service_started
@@ -30,6 +33,8 @@ services:
       Kafka__Enabled: "true"
       Kafka__BootstrapServers: kafka:9092
       Kafka__Topic: customer-transactions
+      Kafka__ConsumerGroupId: transaction-aggregation
+      Kafka__ClientId: transaction-transaction-aggregation-api
       Publisher__Enabled: "true"
       Publisher__IntervalSeconds: "10"
       Publisher__ChunkSize: "50"

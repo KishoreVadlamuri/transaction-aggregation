@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
-using static TransactionAggregation.Api.Models.ApiModels;
+using TransactionAggregation.Api.Models;
 
 namespace TransactionAggregation.Api.Middlewares;
 

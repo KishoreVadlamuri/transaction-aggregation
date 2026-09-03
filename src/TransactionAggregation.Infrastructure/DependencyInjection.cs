@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TransactionAggregation.Application.Interfaces;
@@ -14,6 +15,9 @@ public static class DependencyInjection
     {
         services.Configure<AggregationOptions>(configuration.GetSection(AggregationOptions.SectionName));
         services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
+        services.Configure<ServiceAccountOptions>(configuration.GetSection(ServiceAccountOptions.SectionName));
+        services.AddSingleton<IPasswordHasher<ServiceAccountIdentity>, PasswordHasher<ServiceAccountIdentity>>();
+        services.AddSingleton<IAuthUserStore, ServiceAccountAuthStore>();
 
         var storageOptions = configuration.GetSection(StorageOptions.SectionName).Get<StorageOptions>() ?? new StorageOptions();
 

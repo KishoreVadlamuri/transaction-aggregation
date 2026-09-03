@@ -4,6 +4,7 @@ public static class EndpointRouteBuilderExtensions
 {
     public static IEndpointRouteBuilder MapApiEndpoints(this IEndpointRouteBuilder app)
     {
+        app.MapAuthEndpoints();
         app.MapTransactionEndpoints();
         app.MapAggregationEndpoints();
         return app;
