@@ -1,7 +1,7 @@
 ﻿using MediatR;
+using TransactionAggregation.Api.Models;
 using TransactionAggregation.Application.Features.Transactions.GetTransactions;
 using TransactionAggregation.Application.Features.Transactions.IngestTransactions;
-using static TransactionAggregation.Api.Models.ApiModels;
 
 namespace TransactionAggregation.Api.Endpoints;
 
@@ -10,7 +10,8 @@ public static class TransactionEndpoints
     public static RouteGroupBuilder MapTransactionEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/customers/{customerId}/transactions")
-            .WithTags("Transactions");
+            .WithTags("Transactions")
+            .RequireAuthorization();
 
         group.MapPost("/ingest", IngestAsync)
             .WithName("IngestTransactions")

@@ -1,9 +1,9 @@
 ﻿using MediatR;
+using TransactionAggregation.Api.Models;
 using TransactionAggregation.Application.Features.Aggregations.GetCustomerAggregation;
 using TransactionAggregation.Application.Features.Aggregations.GetTransactionsByCategory;
 using TransactionAggregation.Domain.Entities;
 using TransactionAggregation.Domain.Enums;
-using static TransactionAggregation.Api.Models.ApiModels;
 
 namespace TransactionAggregation.Api.Endpoints;
 
@@ -12,7 +12,8 @@ public static class AggregationEndpoints
     public static void MapAggregationEndpoints(this IEndpointRouteBuilder app)
     {
         var v1 = app.MapGroup("/api/v1/customers/{customerId}/aggregations")
-            .WithTags("Aggregations");
+            .WithTags("Aggregations")
+            .RequireAuthorization();
 
         v1.MapGet("/", GetAggregationAsync)
             .WithName("GetCustomerAggregation")

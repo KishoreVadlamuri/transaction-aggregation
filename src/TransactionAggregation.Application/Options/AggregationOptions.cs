@@ -7,7 +7,7 @@ public sealed class AggregationOptions
     /// <summary>
     /// Artificial compute delay used to simulate an expensive aggregation workload.
     /// </summary>
-    public int ExpensiveComputationDelayMs { get; set; } = 1500;
+    public int ExpensiveComputationDelayMs { get; set; }
 
-    public string DefaultCurrency { get; set; } = "ZAR";
+    public string DefaultCurrency { get; set; } = string.Empty;
 }

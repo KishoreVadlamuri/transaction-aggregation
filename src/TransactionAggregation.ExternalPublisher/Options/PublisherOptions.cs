@@ -12,12 +12,12 @@ public sealed class PublisherOptions
     /// <summary>
     /// Seconds between published chunks once the service is running.
     /// </summary>
-    public int IntervalSeconds { get; set; } = 10;
+    public int IntervalSeconds { get; set; }
 
     /// <summary>
     /// Number of FinancialTransaction records in each chunk.
     /// </summary>
-    public int ChunkSize { get; set; } = 5;
+    public int ChunkSize { get; set; }
 
     /// <summary>
     /// Path to the JSON file containing FinancialTransaction records.
