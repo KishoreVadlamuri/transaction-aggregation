@@ -17,5 +17,6 @@ namespace TransactionAggregation.Domain.Entities
         public required IReadOnlyList<CategoryAggregate> Categories { get; init; }
         public required DateTimeOffset GeneratedAt { get; init; }
         public required TimeSpan ComputationDuration { get; init; }
+        public required bool ServedFromCache { get; init; }
     }
 }

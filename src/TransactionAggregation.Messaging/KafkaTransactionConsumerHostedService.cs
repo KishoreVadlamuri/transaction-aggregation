@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using TransactionAggregation.Application.Interfaces;
 using TransactionAggregation.Application.Options;
 using TransactionAggregation.Domain.Entities;
+using TransactionAggregation.Domain.Enums;
 
 namespace TransactionAggregation.Messaging;
 
@@ -16,15 +17,18 @@ public sealed class KafkaTransactionConsumerHostedService : BackgroundService
 
     private readonly KafkaOptions _options;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ITransactionCategorizer _categorizer;
     private readonly ILogger<KafkaTransactionConsumerHostedService> _logger;
 
     public KafkaTransactionConsumerHostedService(
         IOptions<KafkaOptions> options,
         IServiceProvider serviceProvider,
+        ITransactionCategorizer categorizer,
         ILogger<KafkaTransactionConsumerHostedService> logger)
     {
         _options = options.Value;
         _serviceProvider = serviceProvider;
+        _categorizer = categorizer;
         _logger = logger;
     }
 
@@ -38,62 +42,27 @@ public sealed class KafkaTransactionConsumerHostedService : BackgroundService
 
         await Task.Yield();
 
-        if (string.IsNullOrWhiteSpace(_options.BootstrapServers) || string.IsNullOrWhiteSpace(_options.Topic))
-        {
-            _logger.LogWarning("Kafka consumer configuration incomplete (BootstrapServers or Topic missing); consumer disabled");
-            await IdleUntilCancelled(stoppingToken);
-            return;
-        }
-
-        // Use a local copy of options so we can generate a default group id if needed
-        var opts = _options;
-
-        // Ensure we have a group id; generating a default if not provided prevents librdkafka errors
-        if (string.IsNullOrWhiteSpace(opts.ConsumerGroupId))
-        {
-            opts = new KafkaOptions
-            {
-                Enabled = opts.Enabled,
-                BootstrapServers = opts.BootstrapServers,
-                Topic = opts.Topic,
-                ClientId = opts.ClientId,
-                ConsumerGroupId = string.IsNullOrWhiteSpace(opts.ClientId) ? "transaction-aggregation-consumer" : $"{opts.ClientId}-group"
-            };
-            _logger.LogInformation("No Kafka consumer group id provided; using generated group id {GroupId}", opts.ConsumerGroupId);
-        }
-
         var config = new ConsumerConfig
         {
-            BootstrapServers = opts.BootstrapServers,
-            GroupId = opts.ConsumerGroupId,
-            ClientId = $"{opts.ClientId}-consumer",
+            BootstrapServers = _options.BootstrapServers,
+            GroupId = _options.ConsumerGroupId,
+            ClientId = $"{_options.ClientId}-consumer",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = true,
             SessionTimeoutMs = 10000,
             SocketTimeoutMs = 5000
         };
-        IConsumer<string, string>? consumer = null;
+
+        using var consumer = new ConsumerBuilder<string, string>(config).Build();
 
         try
         {
-            consumer = new ConsumerBuilder<string, string>(config).Build();
+            consumer.Subscribe(_options.Topic);
+            _logger.LogInformation("Kafka consumer subscribed to {Topic}", _options.Topic);
         }
         catch (KafkaException ex)
         {
-            _logger.LogWarning(ex, "Unable to create Kafka consumer; will idle and retry when cancelled");
-            await IdleUntilCancelled(stoppingToken);
-            return;
-        }
-
-        try
-        {
-            consumer.Subscribe(opts.Topic);
-            _logger.LogInformation("Kafka consumer subscribed to {Topic}", opts.Topic);
-        }
-        catch (KafkaException ex)
-        {
-            _logger.LogWarning(ex, "Unable to subscribe to Kafka topic {Topic}; consumer will idle", opts.Topic);
-            consumer.Dispose();
+            _logger.LogWarning(ex, "Unable to subscribe to Kafka topic {Topic}; consumer will idle", _options.Topic);
             await IdleUntilCancelled(stoppingToken);
             return;
         }
@@ -117,20 +86,31 @@ public sealed class KafkaTransactionConsumerHostedService : BackgroundService
                     continue;
                 }
 
+                var previousCategory = transaction.Category;
+                KafkaConsumedTransactionPreparer.EnsureCategorized(transaction, _categorizer);
+                if (previousCategory == TransactionCategoryType.Uncategorized)
+                {
+                    _logger.LogDebug(
+                        "Categorized Kafka transaction {TransactionId} as {Category}",
+                        transaction.Id,
+                        transaction.Category);
+                }
+
                 using var scope = _serviceProvider.CreateScope();
                 var store = scope.ServiceProvider.GetRequiredService<ITransactionStore>();
-                await store.UpsertManyAsync(new[] { transaction }, stoppingToken);
+                await store.UpsertManyAsync([transaction], stoppingToken);
 
                 _logger.LogInformation(
-                    "Consumed Kafka transaction {TransactionId} for {CustomerId} from {Topic} @ {Offset}",
+                    "Consumed Kafka transaction {TransactionId} for {CustomerId} as {Category} from {Topic} @ {Offset}",
                     transaction.Id,
                     transaction.CustomerId,
+                    transaction.Category,
                     result.Topic,
                     result.Offset);
             }
             catch (ConsumeException ex)
             {
-                _logger.LogWarning(ex, "Kafka consume error on topic {Topic}", opts.Topic);
+                _logger.LogWarning(ex, "Kafka consume error on topic {Topic}", _options.Topic);
                 await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             }
             catch (KafkaException ex)
@@ -153,7 +133,7 @@ public sealed class KafkaTransactionConsumerHostedService : BackgroundService
         try
         {
             consumer.Close();
-            _logger.LogInformation("Kafka consumer closed for topic {Topic}", opts.Topic);
+            _logger.LogInformation("Kafka consumer closed for topic {Topic}", _options.Topic);
         }
         catch (Exception ex)
         {
