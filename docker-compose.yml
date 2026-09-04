@@ -10,11 +10,13 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       Storage__PostgresConnectionString: "Host=postgres;Port=5432;Database=transaction_aggregation;Username=postgres;Password=postgres"
       Kafka__BootstrapServers: kafka:9092
-      Aggregation__ExpensiveComputationDelayMs: "1000"
+      Cache__ValkeyConnectionString: valkey:6379
       # Service account password hash (ASP.NET Identity); plaintext never stored in config.
       ServiceAccount__Username: appuser
       ServiceAccount__PasswordHash: AQAAAAIAAYagAAAAEM4nTp2F4Jr8ev8AqBhqc7z2ltXlgwIUautkG0PjCoBWGepWTLj7eILTYQLfw0dzKw==
     depends_on:
+      valkey:
+        condition: service_started
       kafka:
         condition: service_started
       postgres:
@@ -45,6 +47,13 @@ services:
     networks:
       - txn-net
     restart: unless-stopped
+    
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - txn-net
       
   postgres:
     image: postgres:16-alpine

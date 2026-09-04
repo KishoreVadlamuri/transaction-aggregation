@@ -36,8 +36,8 @@ RUN apt-get update \
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV Aggregation__ExpensiveComputationDelayMs=1500
 ENV Kafka__BootstrapServers=kafka:9092
+ENV Cache__ValkeyConnectionString=valkey:6379
 ENV ServiceAccount__Username=appuser
 ENV ServiceAccount__PasswordHash=AQAAAAIAAYagAAAAEM4nTp2F4Jr8ev8AqBhqc7z2ltXlgwIUautkG0PjCoBWGepWTLj7eILTYQLfw0dzKw==
 

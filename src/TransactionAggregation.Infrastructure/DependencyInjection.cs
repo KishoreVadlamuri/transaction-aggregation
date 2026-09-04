@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TransactionAggregation.Application.Interfaces;
 using TransactionAggregation.Application.Options;
+using TransactionAggregation.Infrastructure.Caching;
 using TransactionAggregation.Infrastructure.DataSources;
 using TransactionAggregation.Infrastructure.Persistence;
 
@@ -15,6 +16,7 @@ public static class DependencyInjection
     {
         services.Configure<AggregationOptions>(configuration.GetSection(AggregationOptions.SectionName));
         services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
+        services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
         services.Configure<ServiceAccountOptions>(configuration.GetSection(ServiceAccountOptions.SectionName));
         services.AddSingleton<IPasswordHasher<ServiceAccountIdentity>, PasswordHasher<ServiceAccountIdentity>>();
         services.AddSingleton<IAuthUserStore, ServiceAccountAuthStore>();
@@ -29,6 +31,24 @@ public static class DependencyInjection
         services.AddSingleton<ITransactionSource, BankTransactionSource>();
         services.AddSingleton<ITransactionSource, CreditCardTransactionSource>();
         services.AddSingleton<ITransactionSource, PaymentProviderTransactionSource>();
+
+        var cacheOptions = configuration.GetSection(CacheOptions.SectionName).Get<CacheOptions>() ?? new CacheOptions();
+        // Valkey speaks the Redis protocol; StackExchange.Redis is the supported .NET client.
+        if (!string.IsNullOrWhiteSpace(cacheOptions.ValkeyConnectionString))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = cacheOptions.ValkeyConnectionString;
+                options.InstanceName = cacheOptions.KeyPrefix;
+            });
+        }
+        else
+        {
+            // When Valkey is not configured.
+            services.AddDistributedMemoryCache();
+        }
+
+        services.AddSingleton<ICacheService, DistributedCacheService>();
 
         return services;
     }

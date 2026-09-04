@@ -46,6 +46,12 @@ builder.Services.AddCors(options =>
 var healthChecks = builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 
+var valkeyConnection = builder.Configuration["Cache:ValkeyConnectionString"];
+if (!string.IsNullOrWhiteSpace(valkeyConnection))
+{
+    healthChecks.AddRedis(valkeyConnection, name: "valkey");
+}
+
 var storageOptions = builder.Configuration.GetSection(StorageOptions.SectionName).Get<StorageOptions>() ?? new StorageOptions();
 if (!string.IsNullOrWhiteSpace(storageOptions.PostgresConnectionString))
 {
