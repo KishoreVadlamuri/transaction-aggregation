@@ -1,9 +1,13 @@
 using Scalar.AspNetCore;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using TransactionAggregation.Api;
 using TransactionAggregation.Api.Auth;
 using TransactionAggregation.Api.Endpoints;
 using TransactionAggregation.Api.Middlewares;
+using TransactionAggregation.Api.Observability;
 using TransactionAggregation.Application;
+using TransactionAggregation.Application.Features.Transactions.GetTransactions;
 using TransactionAggregation.Application.Options;
 using TransactionAggregation.Infrastructure;
 using TransactionAggregation.Messaging;
@@ -14,6 +18,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddMessaging(builder.Configuration);
 builder.Services.AddJwtAuth(builder.Configuration);
+builder.Services.AddObservability(builder.Configuration, builder.Environment);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -35,6 +40,24 @@ builder.Services.AddOpenApi("v1", options =>
         return Task.CompletedTask;
     });
     options.AddDocumentTransformer(AuthServiceCollectionExtensions.CreateJwtOpenApiTransformer());
+    options.AddDocumentTransformer(OpenApiDateRangeDefaults.CreateTransformer());
+
+    options.AddSchemaTransformer((schema, context, cancellationToken) =>
+    {
+        if (context.JsonTypeInfo.Type == typeof(GetTransactionsQuery))
+        {
+            var (from, to) = OpenApiDateRangeDefaults.ComputeDefaults(DateTimeOffset.UtcNow);
+            schema.Example = JsonNode.Parse($$"""
+                {
+                  "customerId": "customer Id",
+                  "from": "{{from}}",
+                  "to": "{{to}}"
+                }
+                """);
+        }
+
+        return Task.CompletedTask;
+    });
 });
 
 builder.Services.AddCors(options =>
@@ -70,6 +93,8 @@ startupLogger.LogInformation("API routes mounted under /api/v1/...");
 startupLogger.LogInformation(
     "JWT auth: login at /api/v1/auth/login (service account {Username}; password hash from config/Docker env)",
     builder.Configuration["ServiceAccount:Username"]);
+startupLogger.LogInformation(
+    "Observability: Prometheus /metrics and optional OTLP (Observability:OtlpEndpoint) for Grafana");
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -96,6 +121,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapApiEndpoints();
 app.MapHealthChecks("/health");
+app.MapObservabilityEndpoints(app.Configuration);
 
 app.MapGet("/", () => Results.Redirect("/scalar"))
     .ExcludeFromDescription()

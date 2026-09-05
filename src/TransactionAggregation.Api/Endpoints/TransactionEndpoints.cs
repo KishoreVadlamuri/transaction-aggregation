@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using TransactionAggregation.Api.Models;
 using TransactionAggregation.Application.Features.Transactions.GetTransactions;
 using TransactionAggregation.Application.Features.Transactions.IngestTransactions;
@@ -46,17 +47,34 @@ public static class TransactionEndpoints
 
     private static async Task<IResult> GetStoredAsync(
         string customerId,
-        DateTimeOffset? from,
-        DateTimeOffset? to,
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to,
+        HttpRequest httpRequest,
         ISender sender,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
+        var logger = loggerFactory.CreateLogger("TransactionAggregation.Api.Transactions");
         var end = to ?? DateTimeOffset.UtcNow;
         var start = from ?? end.AddDays(-30);
+
+        logger.LogInformation(
+            "HTTP get stored transactions for {CustomerId} Query={Query} BoundFrom={BoundFrom} BoundTo={BoundTo} EffectiveFrom={From} EffectiveTo={To}",
+            customerId,
+            httpRequest.QueryString.Value,
+            from,
+            to,
+            start,
+            end);
 
         var transactions = await sender.Send(
             new GetTransactionsQuery(customerId, start, end),
             cancellationToken);
+
+        logger.LogInformation(
+            "HTTP returned {Count} stored transactions for {CustomerId}",
+            transactions.Count,
+            customerId);
 
         return Results.Ok(transactions);
     }

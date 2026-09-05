@@ -8,7 +8,7 @@ namespace TransactionAggregation.Messaging;
 /// Applies the same Uncategorized → rule-based category step used by ingest
 /// before Kafka-consumed transactions are persisted.
 /// </summary>
-internal static class KafkaConsumedTransactionPreparer
+public static class KafkaConsumedTransactionPreparer
 {
     public static void EnsureCategorized(
         FinancialTransaction transaction,
