@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using TransactionAggregation.Application.Interfaces;
+using TransactionAggregation.Application.Telemetry;
 using TransactionAggregation.Domain.Enums;
 
 namespace TransactionAggregation.Application.Features.Transactions.IngestTransactions;
@@ -77,6 +78,8 @@ public sealed class IngestTransactionsHandler (IEnumerable<ITransactionSource> s
             request.CustomerId,
             sourceNames.Count,
             string.Join(", ", sourceNames));
+
+        AggregationMetrics.RecordIngest(collected.Count, sourceNames.Count);
 
         return new IngestTransactionsResult
         {

@@ -9,7 +9,7 @@ namespace TransactionAggregation.Infrastructure.Caching;
 /// Cache backed solely by <see cref="IDistributedCache"/> (Valkey via StackExchange.Redis,
 /// or in-process distributed memory when Valkey is not configured).
 /// </summary>
-public sealed class DistributedCacheService : ICacheService
+public class DistributedCacheService : ICacheService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 

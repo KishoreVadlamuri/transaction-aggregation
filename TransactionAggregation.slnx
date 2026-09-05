@@ -11,6 +11,6 @@
 	<Project Path="src/TransactionAggregation.Messaging/TransactionAggregation.Messaging.csproj" Id="be2f63de-1f94-4a24-83f9-fc2fc547c245" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="src/TransactionAggregation.UnitTests/TransactionAggregation.UnitTests.csproj" Id="fa7ebcec-92ee-49ca-8482-ed325429d004" />
+    <Project Path="tests/TransactionAggregation.UnitTests/TransactionAggregation.UnitTests.csproj" Id="fa7ebcec-92ee-49ca-8482-ed325429d004" />
   </Folder>
 </Solution>

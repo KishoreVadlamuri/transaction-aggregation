@@ -9,11 +9,12 @@ COPY src/TransactionAggregation.Infrastructure/TransactionAggregation.Infrastruc
 COPY src/TransactionAggregation.Messaging/TransactionAggregation.Messaging.csproj src/TransactionAggregation.Messaging/
 COPY src/TransactionAggregation.Api/TransactionAggregation.Api.csproj src/TransactionAggregation.Api/
 COPY src/TransactionAggregation.ExternalPublisher/TransactionAggregation.ExternalPublisher.csproj src/TransactionAggregation.ExternalPublisher/
-COPY src/TransactionAggregation.UnitTests/TransactionAggregation.UnitTests.csproj src/TransactionAggregation.UnitTests/
+COPY tests/TransactionAggregation.UnitTests/TransactionAggregation.UnitTests.csproj tests/TransactionAggregation.UnitTests/
 
 RUN dotnet restore TransactionAggregation.slnx
 
 COPY src/ src/
+COPY tests/ tests/
 
 RUN dotnet publish src/TransactionAggregation.Api/TransactionAggregation.Api.csproj \
     -c Release \
@@ -34,12 +35,26 @@ RUN apt-get update \
     && mkdir -p /app/data/snapshots \
     && chown -R $APP_UID:$APP_UID /app
 
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV Aggregation__CacheTtlSeconds=120
+ENV Aggregation__DefaultCurrency=ZAR
 ENV Kafka__BootstrapServers=kafka:9092
+ENV Kafka__Topic=customer-transactions
+ENV Kafka__ConsumerGroupId=transaction-aggregation
+ENV Kafka__ClientId=transaction-aggregation-api
 ENV Cache__ValkeyConnectionString=valkey:6379
+ENV Cache__KeyPrefix=txn-agg:
+ENV Storage__PostgresConnectionString=Host=postgres;Port=5432;Database=transaction_aggregation;Username=postgres;Password=postgres
+ENV Jwt__Issuer=transaction-aggregation
+ENV Jwt__Audience=transaction-aggregation-api
+ENV Jwt__SigningKey=dev-only-change-me-transaction-aggregation-signing-key-32b
+ENV Jwt__ExpirationMinutes=60
 ENV ServiceAccount__Username=appuser
 ENV ServiceAccount__PasswordHash=AQAAAAIAAYagAAAAEM4nTp2F4Jr8ev8AqBhqc7z2ltXlgwIUautkG0PjCoBWGepWTLj7eILTYQLfw0dzKw==
+ENV Observability__Enabled=true
+ENV Observability__PrometheusEnabled=true
+ENV Observability__OtlpProtocol=grpc
 
 EXPOSE 8080
 
@@ -55,6 +70,7 @@ FROM mcr.microsoft.com/dotnet/runtime:10.0 AS publisher
 WORKDIR /app
 
 ENV DOTNET_ENVIRONMENT=Production
+ENV Kafka__Enabled=true
 ENV Kafka__BootstrapServers=kafka:9092
 ENV Kafka__Topic=customer-transactions
 ENV Kafka__ConsumerGroupId=transaction-aggregation

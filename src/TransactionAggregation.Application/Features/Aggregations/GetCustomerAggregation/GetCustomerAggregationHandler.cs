@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using TransactionAggregation.Application.Interfaces;
 using TransactionAggregation.Application.Options;
+using TransactionAggregation.Application.Telemetry;
 using TransactionAggregation.Domain.Entities;
 using TransactionAggregation.Domain.Enums;
 
@@ -51,6 +52,10 @@ CancellationToken cancellationToken)
                     "Serving aggregation for {CustomerId} from cache ({TotalTransactions} transactions)",
                     request.CustomerId,
                     cached.TotalTransactions);
+                AggregationMetrics.RecordAggregation(
+                    servedFromCache: true,
+                    durationMs: 0,
+                    transactionCount: cached.TotalTransactions);
                 return CloneWithCacheFlag(cached, servedFromCache: true);
             }
 
@@ -123,7 +128,7 @@ CancellationToken cancellationToken)
         };
 
         await cache.SetAsync(cacheKey, result, TimeSpan.FromSeconds(options.Value.CacheTtlSeconds), cancellationToken);
-        
+
         logger.LogDebug(
             "Cached aggregation for {CustomerId} with TTL {TtlSeconds}s",
             request.CustomerId,
@@ -138,6 +143,11 @@ CancellationToken cancellationToken)
             result.NetAmount,
             result.Categories.Count,
             stopwatch.ElapsedMilliseconds);
+
+        AggregationMetrics.RecordAggregation(
+            servedFromCache: false,
+            durationMs: stopwatch.Elapsed.TotalMilliseconds,
+            transactionCount: result.TotalTransactions);
 
         return result;
     }

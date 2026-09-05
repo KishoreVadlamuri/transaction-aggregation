@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using TransactionAggregation.Api.Models;
 using TransactionAggregation.Application.Features.Aggregations.GetCustomerAggregation;
 using TransactionAggregation.Application.Features.Aggregations.GetTransactionsByCategory;
@@ -35,8 +36,8 @@ public static class AggregationEndpoints
 
     private static async Task<IResult> GetAggregationAsync(
     string customerId,
-    DateTimeOffset? from,
-    DateTimeOffset? to,
+    [FromQuery] DateTimeOffset? from,
+    [FromQuery] DateTimeOffset? to,
     ISender sender,
     HttpContext httpContext,
     ILoggerFactory loggerFactory,
@@ -74,8 +75,8 @@ public static class AggregationEndpoints
     private static async Task<IResult> GetTransactionsByCategoryAsync(
         string customerId,
         TransactionCategoryType category,
-        DateTimeOffset? from,
-        DateTimeOffset? to,
+        [FromQuery] DateTimeOffset? from,
+        [FromQuery] DateTimeOffset? to,
         ISender sender,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
