@@ -10,7 +10,7 @@ public static class TransactionEndpoints
 {
     public static RouteGroupBuilder MapTransactionEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/customers/{customerId}/transactions")
+        var group = app.MapGroup("/api/v1/customers/{customerId}/transactions")
             .WithTags("Transactions")
             .RequireAuthorization();
 
