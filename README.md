@@ -98,6 +98,70 @@ Health (no auth): `curl http://localhost:8080/health`
 
 ---
 
+### Architecture
+
+![Transaction Aggregation architecture](docs/architecture.png)
+
+The previous diagram showed a generic API with controllers and a single event-processing box. The running system is a **Minimal API** plus a separate **ExternalPublisher** worker, with **Domain**, **MediatR**, **Kafka produce/consume**, **mock bank/card/wallet sources**, and **Prometheus / Tempo / Grafana**.
+
+```mermaid
+flowchart TB
+  consumers[API Consumers]
+  publisher[External Publisher Worker<br/>JSON chunks on a timer]
+
+  subgraph api["Transaction Aggregation API (.NET 10)"]
+    direction TB
+    subgraph apilayer[API Layer]
+      endpoints[Minimal API endpoints]
+      jwt[JWT auth + Scalar OpenAPI]
+      health[Health + Prometheus /metrics]
+    end
+    subgraph applayer[Application Layer]
+      mediatr[MediatR commands/queries]
+      categorizer[Rule-based categorization]
+      agg[Aggregation handlers]
+    end
+    subgraph domain[Domain Layer]
+      entities[Entities and enums]
+    end
+    subgraph infra[Infrastructure Layer]
+      mocks[Mock sources: Bank / Card / Wallet]
+      store[EF Core store]
+      cache[Valkey / in-process cache]
+    end
+    subgraph messaging[Messaging Layer]
+      kprod[Kafka producer]
+      kcons[Kafka consumer hosted service]
+    end
+    apilayer --> applayer --> domain
+    domain --> infra
+    domain --> messaging
+  end
+
+  pg[(PostgreSQL<br/>transactions)]
+  valkey[(Valkey<br/>cached aggregations)]
+  kafka[[Kafka<br/>customer-transactions]]
+
+  subgraph obs[Observability]
+    prom[Prometheus]
+    tempo[Tempo OTLP traces]
+    grafana[Grafana dashboards]
+  end
+
+  consumers -->|HTTP| apilayer
+  publisher -->|produce| kafka
+  store --> pg
+  cache --> valkey
+  kprod --> kafka
+  kafka --> kcons
+  health --> prom
+  api --> tempo
+  prom --> grafana
+  tempo --> grafana
+```
+
+---
+
 ## Run without the full Docker stack
 
 Use this if you want to debug the API in an IDE. **PostgreSQL is still required** (the API applies EF Core migrations on startup). Easiest option: start only Postgres from Compose, then run the API on the host.
